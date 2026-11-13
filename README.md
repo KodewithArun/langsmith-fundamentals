@@ -4,6 +4,10 @@ Hands-on notes from learning **LangSmith** — LLM observability and tracing —
 
 Each script is a small, self-contained step. The point is not the app itself, but **what the trace looks like in LangSmith** and which knobs control it (`run_name`, `tags`, `metadata`, nesting, project names).
 
+> 📘 **Full theory notes:** see [`NOTES.md`](NOTES.md) for the complete conceptual guide —
+> observability theory, data model, tracing internals, evaluation design, prompt
+> versioning, security, cost and best practices.
+
 ---
 
 ## Why LangSmith?
@@ -62,6 +66,7 @@ Also place the source PDF (`islr.pdf`) in the repo root for the RAG scripts. It 
 | `4_agent.py` | ReAct agent with tools (DuckDuckGo search + weather API) and `AgentExecutor` |
 | `5_langgraph.py` | *Next up* — LangGraph fan-out/fan-in essay evaluator (not committed yet) |
 | `screenshots/` | LangSmith UI screenshots referenced below |
+| `NOTES.md` | Complete theory notes: data model, tracing, evaluation, security, cost |
 
 ---
 
