@@ -51,6 +51,16 @@ LANGCHAIN_PROJECT=langsmith-demo
 
 Also place the source PDF (`islr.pdf`) in the repo root for the RAG scripts. It is ignored by git because of its size.
 
+### Run the Streamlit chatbot
+
+```bash
+streamlit run 6_streamlit_threading_streaming.py
+```
+
+Each conversation gets its own LangGraph `thread_id`, replies stream token by token, and every turn appears in LangSmith as `chat_turn_<n>` with `thread_id`, `session_id`, turn number and model attached as metadata.
+
+![Streamlit chatbot with per-conversation threads in the sidebar, streamed Markdown replies, and a LangSmith trace details panel](screenshots/streamlit-threading-streaming.png)
+
 ---
 
 ## Repository structure
@@ -64,8 +74,9 @@ Also place the source PDF (`islr.pdf`) in the repo root for the RAG scripts. It 
 | `3_rag_v3.py` | Same pipeline, but grouped under a **single root run** with nested parent/child spans |
 | `3_rag_v4.py` | RAG + **index caching** (fingerprint-based `.indices/`), so the vector store is built once |
 | `4_agent.py` | ReAct agent with tools (DuckDuckGo search + weather API) and `AgentExecutor` |
-| `5_langgraph.py` | *Next up* — LangGraph fan-out/fan-in essay evaluator (not committed yet) |
-| `screenshots/` | LangSmith UI screenshots referenced below |
+| `5_langgraph.py` | LangGraph fan-out/fan-in essay evaluator with per-node traces |
+| `6_streamlit_threading_streaming.py` | Streamlit chatbot: checkpointer + `thread_id` memory, token streaming, LangSmith metadata per turn |
+| `screenshots/` | LangSmith UI and Streamlit app screenshots referenced below |
 | `NOTES.md` | Complete theory notes: data model, tracing, evaluation, security, cost |
 
 ---
@@ -280,6 +291,21 @@ How to debug with it:
 2. Check the **retriever output** — is the right chunk actually there?
 3. Check the **prompt input** — did variables get filled correctly?
 4. Check the **model output** — is the failure in generation or before it?
+
+### Threaded conversations in the Streamlit app
+
+![LangSmith tracing list for the Streamlit chatbot showing chat_turn runs with latency, token count and cost](screenshots/langsmith-streamlit-traces.png)
+
+Each turn from `6_streamlit_threading_streaming.py` lands in the `langgraph-streamlit-threading-streaming` project as a `chat_turn_<n>` trace. The list view makes it easy to compare turns:
+
+- the **run name** carries the turn number
+- **tags** include `streamlit`, `langgraph`, `threading` and `streaming`
+- **latency / tokens / cost** are tracked per turn
+- the **Threads** filter groups every turn that shares a `thread_id`
+
+![LangSmith thread view showing nested chat_turn -> chat_node -> ChatGroq spans for a multi-turn conversation](screenshots/langsmith-thread-view.png)
+
+The **Thread** view is the payoff of the checkpointer: all turns of one conversation are grouped together, and each turn expands into `chat_turn_<n>` → `chat_node` → `ChatGroq`. You can replay the whole conversation, including inputs, outputs, latency and token usage, even though Streamlit only sent one message at a time.
 
 ---
 
